@@ -138,8 +138,10 @@ exports.likeDocument = async (req, res) => {
   try {
     let objId = req.params.objId;
     // const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    const userIp = req.headers['x-forwarded-for'] ;
-
+    let userIp = req.headers['x-forwarded-for'] ;
+    const index = userIp.indexOf(',');
+    userIp = index !== -1 ? userIp.slice(0, index) : userIp;
+    
     objId=+objId
     // console.log(objId);
     
