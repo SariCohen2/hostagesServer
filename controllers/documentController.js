@@ -137,7 +137,9 @@ exports.getLikesCount=async(req,res)=>{
 exports.likeDocument = async (req, res) => {
   try {
     let objId = req.params.objId;
-    const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    // const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const userIp = req.headers['x-forwarded-for'] ;
+
     objId=+objId
     // console.log(objId);
     
