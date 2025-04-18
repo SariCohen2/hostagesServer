@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const documentRoutes = require('./routes/documentRoutes');
+const deedRoutes = require('./routes/deedRoutes');
+const dailyRoutes = require('./routes/dailyTaskRoutes');
 const cors =require('cors') ;
 
 // Load environment variables
@@ -21,8 +23,11 @@ mongoose
 
 // Routes
 app.use('/api/documents', documentRoutes);
+app.use('/api/deeds',deedRoutes)
+app.use('/api/daily',dailyRoutes)
 
 // Start the server
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

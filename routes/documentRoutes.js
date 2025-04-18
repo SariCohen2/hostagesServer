@@ -1,18 +1,23 @@
 const express = require('express');
 const {
   getAllDocuments,
-  // getDocumentById,
-  // createDocument,
-  // deleteDocument,
+  getDiedDocumens,
+  getReturnedDocumens,
+  getExistDocumens,
   editDocument,
   getLikesCount,
   likeDocument,
-  // checkPassword
+  addComment
 } = require('../controllers/documentController');
 
 const router = express.Router();
 
 router.get('/all', getAllDocuments);
+
+router.get('/died', getDiedDocumens);
+router.get('/exist', getExistDocumens);
+router.get('/returned', getReturnedDocumens);
+
 router.get('/likesCount', getLikesCount);
 // router.get('/:id', getDocumentById);
 // router.post('/', createDocument);
@@ -20,6 +25,7 @@ router.get('/likesCount', getLikesCount);
 router.put('/edit/:id',editDocument);
 // router.get('/like/:docId/',likeDocument)
 router.put('/:objId', likeDocument);
+router.put('/addComment/:id',addComment)
 // router.post('/checkUser/:id',checkPassword)
 
 

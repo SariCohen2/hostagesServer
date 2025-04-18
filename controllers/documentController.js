@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
-
+const sanitizeHtml = require('sanitize-html');
+const Joi = require('joi');
 dotenv.config();
 
 const myObj = require('../models/documentModel');
@@ -10,16 +11,40 @@ const myObj = require('../models/documentModel');
 exports.getAllDocuments = async (req, res) => {
   try {
     const documents = await myObj.find();
-    // const filteredDocuments = documents.map(({ name, content, createdAt, id, likesCount,tags }) => ({ name, content, createdAt, id, likesCount,tags }));
-
-    // res.status(200).json(filteredDocuments);
     res.status(200).json(documents);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+exports.getDiedDocumens = async (req, res) => {
+  try {
+    const documents = await myObj.find({ died: true });
+    res.status(200).json(documents);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+exports.getReturnedDocumens = async (req, res) => {
+  try {
+    const documents = await myObj.find({ returned: true });
+    res.status(200).json(documents);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+exports.getExistDocumens = async (req, res) => {
+  try {
+    console.log('eee');
+    
+    const documents = await myObj.find();
+    const filteredDocuments = documents.filter(doc => doc.died!= true&&doc.returned!=true&&!doc.returnDate);
+console.log(filteredDocuments);
 
+    res.status(200).json(filteredDocuments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
 // Get a document by ID
 // exports.getDocumentById = async (req, res) => {
 //   try {
@@ -92,66 +117,71 @@ exports.getAllDocuments = async (req, res) => {
 // };
 //Add Tag
 exports.editDocument = async (req, res) => {
-  
+
   try {
     console.log(req.params.id);
-    
+
     const document = await myObj.findById(req.params.id);
+
+    const tags = req.body;
     
-      const tags  = req.body;
-      console.log(tags);
-      
-      if (tags) {
-        document.tags = tags;  
-      }
-      await document.save();
-      res.status(200).json(document);
+    console.log(tags);
+
+    if (tags) {
+      document.tags = tags;
+    }
+    await document.save();
+    res.status(200).json(document);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 }
 
-exports.getLikesCount=async(req,res)=>{
+exports.getLikesCount = async (req, res) => {
   try {
     // const document = await myObj.findById(req.params.id);
     // if (!document) {
     //   return res.status(404).json({ success: false, message: "Document not found" });
     // }
     // res.status(200).json({likes:document.likesCount});
-    likesObj=await myObj.find()
-    let lst=[]
+    likesObj = await myObj.find()
+    let lst = []
     // lst=likesObj.map((doc)=>{"_id"=doc._id,"likesCount"=doc.likesCount})
     for (let i = 0; i < likesObj.length; i++) {
       const element = likesObj[i];
-      lst.push({"_id":element._id,"likesCount":element.likesCount})      
+      lst.push({ "_id": element._id, "likesCount": element.likesCount })
     }
 
     console.log(lst);
-    
-    res.status(200).json({likes:lst})
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-      }
+
+    res.status(200).json({ likes: lst })
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 }
 exports.likeDocument = async (req, res) => {
   try {
     let objId = req.params.objId;
     // const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    let userIp = req.headers['x-forwarded-for'] ;
+    let userIp = req.headers['x-forwarded-for'];
+    if (!userIp) {
+      userIp = req.connection.remoteAddress;
+    }
+
     const index = userIp.indexOf(',');
     userIp = index !== -1 ? userIp.slice(0, index) : userIp;
-    
-    objId=+objId
+
+    objId = +objId
     // console.log(objId);
-    
+
     const document = await myObj.findById(objId);
     // console.log(document);
-    
+
     // allDocs=await myObj.find()
     // console.log(allDocs);
-    
-    
+
+
     if (!document) {
       return res.status(404).json({ success: false, message: "Document not found" });
     }
@@ -173,5 +203,54 @@ exports.likeDocument = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: "An error occurred" });
+  }
+};
+exports.addComment = async (req, res) => {
+  try {
+    const objId = req.params.id;
+    let comment = req.body.comment;
+    console.log(objId);
+
+    // שלב 1: ולידציה – לבדוק שהתוכן הוא טקסט בגודל תקני
+    const schema = Joi.string().min(1).max(500).required();
+    const { error } = schema.validate(comment);
+    if (error) {
+      return res.status(400).json({ success: false, message: "Invalid comment" });
+    }
+
+    // שלב 2: סינון – שימוש ב-sanitize-html כדי למנוע תגיות HTML מזיקות
+    comment = sanitizeHtml(comment, {
+      allowedTags: [], // לא מאפשר תגיות HTML
+      allowedAttributes: {} // לא מאפשר תכונות HTML
+    });
+
+    // שלב 3: מציאת האובייקט במסד נתונים
+    const document = await myObj.findById(objId);
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found"
+      });
+    }
+
+    // שלב 4: הוספת התגובה למערך התגובות
+    document.comments.push({ text: comment, createdAt: new Date() });
+
+    // שלב 5: שמירה במסד הנתונים
+    await document.save();
+
+    // שלב 6: חזרה עם התוצאה
+    return res.status(200).json({
+      success: true,
+      message: "Comment added successfully",
+      comments: document.comments
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 };
