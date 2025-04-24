@@ -17,7 +17,7 @@ const dailyTaskSchema = new mongoose.Schema({
     },
     goal: {
         type: Number,
-        default: 55,
+        default: 59,
     },
       completedGoalDates: [String] // dates when goal was reached
 });

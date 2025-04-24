@@ -16,6 +16,7 @@ exports.commentSchema = commentSchema;
 const objSchema = new mongoose.Schema({
   _id: { type: Number, require: true },
   hostageName: { type: String },
+  nameForPray:{type:String},
   description: { type: String },
   lyrics: { type: String },
   audioLink: { type: String },
