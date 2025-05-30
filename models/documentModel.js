@@ -1,6 +1,6 @@
 const { type } = require('express/lib/response');
 const mongoose = require('mongoose');
-const VALID_TAGS = ['🧡', '😮', '😶', '💔'];
+const VALID_TAGS = ['🧡', '😮', '😶', '💔','👍'];
 exports.VALID_TAGS = VALID_TAGS;
 const commentSchema = new mongoose.Schema({
   text: {
