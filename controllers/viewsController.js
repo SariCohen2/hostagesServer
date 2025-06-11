@@ -88,10 +88,13 @@ exports.getViews = async (req, res) => {
 // מוסיף צפייה
 exports.addView = async (req, res) => {
     try {
-        const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        let ip = req.headers['x-forwarded-for'];
+        if (!userIp) {
+            ip = req.connection.remoteAddress;
+        }
         const userAgent = req.headers['user-agent'] || 'unknown';
         console.log('ip:', ip);
-        
+
 
         const views = await ensureViewsDocumentExists();
 
@@ -99,7 +102,7 @@ exports.addView = async (req, res) => {
         if (!views.viewdBy.includes(ip)) {
             views.viewdBy.push(ip);
             console.log('view pushed succesfully');
-            
+
         }
 
         // עדכון מונה צפיות כולל
