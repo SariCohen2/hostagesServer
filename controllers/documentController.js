@@ -81,11 +81,11 @@ console.log(filteredDocuments);
 //     console.log('in delete');
 //     const document = await Document.findById(req.params.id);
 //     const password = req.params.password;
-//     const isCorrect = await comparePasswords(password, document.password);
+//     // const isCorrect = await comparePasswords(password, document.password);
 
 
 //     if (!document) return res.status(404).json({ message: 'Document not found' });
-//     if (password == process.env.MANAGER_PASS || isCorrect) {
+//     if (password == process.env.MANAGER_PASS) {
 //       await Document.findByIdAndDelete(req.params.id);
 //       console.log("delete successfully")
 //       res.status(200).json({ message: 'Document deleted successfully' });
@@ -115,6 +115,38 @@ console.log(filteredDocuments);
 //     res.status(500).json({ message: error.message });
 //   }
 // };
+
+exports.deleteComment = async (req, res) => {
+  try {
+    console.log('in deleteComment');
+
+    const { id, password, comment } = req.params;
+
+    const document = await myObj.findById(id);
+    if (!document) return res.status(404).json({ message: 'Document not found' });
+
+    if (password !== process.env.MANAGER_PASS) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+     const updatedDoc = await myObj.findByIdAndUpdate(
+      id,
+      { $pull: { comments: { text: comment } } }, 
+      { new: true }
+    );
+    if (!updatedDoc) {
+      return res.status(404).json({ message: 'Comment not found or already removed' });
+    }
+
+    console.log('Comment deleted successfully');
+    res.status(200).json({ message: 'Comment deleted successfully' });
+
+  } catch (error) {
+    console.error('Error in deleteComment:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 //Add Tag
 exports.editDocument = async (req, res) => {
 

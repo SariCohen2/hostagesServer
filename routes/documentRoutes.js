@@ -7,7 +7,8 @@ const {
   editDocument,
   getLikesCount,
   likeDocument,
-  addComment
+  addComment,
+  deleteComment
 } = require('../controllers/documentController');
 
 const router = express.Router();
@@ -26,6 +27,7 @@ router.put('/edit/:id',editDocument);
 // router.get('/like/:docId/',likeDocument)
 router.put('/:objId', likeDocument);
 router.put('/addComment/:id',addComment)
+router.delete('/delete-comment/:id/:password/:comment', deleteComment);
 // router.post('/checkUser/:id',checkPassword)
 
 
