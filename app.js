@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const documentRoutes = require('./routes/documentRoutes');
 const deedRoutes = require('./routes/deedRoutes');
 const dailyRoutes = require('./routes/dailyTaskRoutes');
+const routerDeeds = require('./routes/views');
+
 const cors =require('cors') ;
 
 // Load environment variables
@@ -25,6 +27,7 @@ mongoose
 app.use('/api/documents', documentRoutes);
 app.use('/api/deeds',deedRoutes)
 app.use('/api/daily',dailyRoutes)
+app.use('/api/views',routerDeeds)
 
 // Start the server
 

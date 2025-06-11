@@ -86,7 +86,7 @@ exports.getTodayTask = async (req, res) => {
         date: today,
         // taskText:getRandomAct(),
         taskText: actsOfKindness[getCurrentDayNumber() - 1],
-        goal:58
+        goal:54
       });
     }
 
